@@ -14,25 +14,23 @@ def prepare_base_dataframe(df):
     "director",
     "production_companies",
     "release_year",
+    "keywords",
     "vote_average",
   ]
 
-  df_clean = df[cols_to_keep].copy()
+  df = df[cols_to_keep].copy()
 
   # Supprimer les lignes avec vote_average manquant
-  df_clean = df_clean.dropna(subset=["vote_average"])
+  df = df.dropna(subset=["vote_average"])
 
   # Remplir les NaN numériques par la médiane
   numerique_col = ["budget", "runtime", "release_year"]
   for col in numerique_col:
-      if col in df_clean.columns:
-          df_clean[col] = df_clean[col].fillna(df_clean[col].median())
-
+      if col in df.columns:
+          df[col] = df[col].fillna(df[col].median())
   # Remplir les NaN texte par "Unknown"
-  text_cols = ["genres", "cast", "director", "production_companies"]
+  text_cols = ["genres", "cast", "director", "production_companies", "keywords"]
   for col in text_cols:
-    if col in df_clean.columns:
-      df_clean[col] = df_clean[col].fillna("Unknown")
-  df_clean = df_clean.reset_index(drop=True)
+      df[col] = df[col].fillna("Unknown")
 
-  return df_clean
+  return df
