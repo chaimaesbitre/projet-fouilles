@@ -7,7 +7,6 @@ def load_data(path):
 def prepare_base_dataframe(df):
   # Colonnes à garder
   cols_to_keep = [
-    "budget",
     "runtime",
     "genres",
     "cast",
@@ -24,7 +23,7 @@ def prepare_base_dataframe(df):
   df = df.dropna(subset=["vote_average"])
 
   # Remplir les NaN numériques par la médiane
-  numerique_col = ["budget", "runtime", "release_year"]
+  numerique_col = ["runtime", "release_year"]
   for col in numerique_col:
       if col in df.columns:
           df[col] = df[col].fillna(df[col].median())

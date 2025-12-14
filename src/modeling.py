@@ -41,14 +41,15 @@ def evaluate(model, X_test, y_test):
     "mse": mse,
     "r2": r2,
     "r2_percent": r2 * 100,
-    "acc_±0.5": acc_05,
-    "acc_±1": acc_1,
-    "acc_±2": acc_2,
+    "acc_0.5": acc_05,
+    "acc_1": acc_1,
+    "acc_2": acc_2,
     "pred": y_pred,
 }
 
 
 def baseline_metrics_from_y(y_train, y_test):
+  # moyenne des notes du train comme prédiction
   baseline_value = y_train.mean()
   y_pred_baseline = np.full(len(y_test), baseline_value)
 
@@ -64,8 +65,8 @@ def baseline_metrics_from_y(y_train, y_test):
     "mse": mse,
     "r2": r2,
     "r2_percent": r2 * 100,
-    "acc_±0.5": acc_05,
-    "acc_±1": acc_1,
-    "acc_±2": acc_2,
+    "acc_0.5": acc_05,
+    "acc_1": acc_1,
+    "acc_2": acc_2,
     "pred": y_pred_baseline,
   }

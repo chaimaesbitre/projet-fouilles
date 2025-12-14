@@ -3,6 +3,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 #**********************Les encodages des colonnes texte pour eviter l'overfitting ******************#
 
+# fonction pour splitter les chaines de caractères séparées par "|"
 def split_pipe(value):
   if not isinstance(value, str) or value.strip() == "":
     return []
@@ -11,11 +12,12 @@ def split_pipe(value):
 
 # ENCODAGE GENRES
 # k = 5 genres les plus fréquents
-def get_top_genres(df, top_k=5):
+def get_top_genres(df, top_k):
   all_genres = []
   for txt in df["genres"]:
     all_genres.extend(split_pipe(txt))
   occ = {}
+  # compter les occurrences de chaque genre
   for g in all_genres:
     occ[g] = occ.get(g, 0) + 1
   sorted_genres = sorted(occ.items(), key=lambda x: x[1], reverse=True)
@@ -27,9 +29,7 @@ def add_genre_columns(df, top_genres):
   df = df.copy()
   for g in top_genres:
     col_name = f"genre_{g.replace(' ', '_')}"
-    df[col_name] = df["genres"].apply(
-        lambda lst: 1 if g in split_pipe(lst) else 0
-    )
+    df[col_name] = df["genres"].apply(lambda lst: 1 if g in split_pipe(lst) else 0)
   return df
 
 # ENCODAGE ACTEURS
@@ -42,7 +42,7 @@ def get_main_actor_column(df):
   return acteurs
 
 # les 10 acteurs principaux les plus fréquents
-def get_top_main_actors(df, top_k=10):
+def get_top_main_actors(df, top_k):
   main_actors = get_main_actor_column(df)
   freq = {}
   for a in main_actors:
@@ -55,7 +55,8 @@ def add_actor_columns(df, top_acteurs):
   df = df.copy()
   df["main_actor"] = get_main_actor_column(df)
   for a in top_acteurs:
-    df["actor_" + a] = (df["main_actor"] == a).astype(int)
+    col_name = f"actor_{a.replace(' ', '_')}"
+    df[col_name] = (df["main_actor"] == a).astype(int)
   return df
 
 # ENCODAGE COMPAGNIES DE PRODUCTION
@@ -68,7 +69,7 @@ def get_main_company_column(df):
   return companies
 
 # les 10 compagnies de production les plus fréquentes
-def get_top_main_companies(df, top_k=10):
+def get_top_main_companies(df, top_k):
   main_companies = get_main_company_column(df)
   freq = {}
   for c in main_companies:
@@ -81,7 +82,7 @@ def add_company_columns(df, top_companies):
   df = df.copy()
   df["main_company"] = get_main_company_column(df)
   for c in top_companies:
-    col_name = f"company_{c}"
+    col_name = f"company_{c.replace(' ', '_')}"
     df[col_name] = (df["main_company"] == c).astype(int)
   return df
 
@@ -109,7 +110,7 @@ def add_director_columns(df, top_realisateur):
   df = df.copy()
   df["main_director"] = get_main_director_column(df)
   for d in top_realisateur:
-    col_name = f"director_{d}"
+    col_name = f"director_{d.replace(' ', '_')}"
     df[col_name] = (df["main_director"] == d).astype(int)
   return df
 
@@ -123,11 +124,15 @@ def encode_keywords_tfidf_train_test(X_train, X_test, max_features=1000, min_df=
     return X_train, X_test
 
   train_corpus = X_train["keywords"].fillna("").str.replace("|", " ", regex=False)
+  # sur le test on utilise le même vocabulaire que pour le train
   test_corpus  = X_test["keywords"].fillna("").str.replace("|", " ", regex=False)
   vectorizer = TfidfVectorizer(max_features=max_features, min_df=min_df)
+  # apprend le vocabulaire 
   X_train_tfidf = vectorizer.fit_transform(train_corpus)
+  # transforme le test avec le même vocabulaire
   X_test_tfidf  = vectorizer.transform(test_corpus)
 
+  # convertir en colonnes DataFrame
   feature_names = vectorizer.get_feature_names_out()
   train_tfidf_df = pd.DataFrame(
     X_train_tfidf.toarray(),
@@ -139,7 +144,7 @@ def encode_keywords_tfidf_train_test(X_train, X_test, max_features=1000, min_df=
     columns=[f"kw_{w}" for w in feature_names],
     index=X_test.index,
   )
-
+  # concaténer les nouvelles colonnes TF-IDF aux DataFrames originaux
   X_train = pd.concat([X_train.drop(columns=["keywords"]), train_tfidf_df], axis=1)
   X_test  = pd.concat([X_test.drop(columns=["keywords"]),  test_tfidf_df], axis=1)
   return X_train, X_test
@@ -150,22 +155,22 @@ def encode_all(X_train, X_test):
   X_test = X_test.copy()
 
   # Genres
-  top_genres = get_top_genres(X_train, top_k=5)
+  top_genres = get_top_genres(X_train, 5)
   X_train = add_genre_columns(X_train, top_genres)
   X_test  = add_genre_columns(X_test, top_genres)
 
   # Acteurs principaux
-  top_actors = get_top_main_actors(X_train, top_k=10)
+  top_actors = get_top_main_actors(X_train,10)
   X_train = add_actor_columns(X_train, top_actors)
   X_test  = add_actor_columns(X_test, top_actors)
 
   # Réalisateurs
-  top_realisateur = get_top_main_realisateur(X_train, top_k=10)
+  top_realisateur = get_top_main_realisateur(X_train, 10)
   X_train = add_director_columns(X_train, top_realisateur)
   X_test  = add_director_columns(X_test, top_realisateur)
 
   # Compagnies de production
-  top_companies = get_top_main_companies(X_train, top_k=10)
+  top_companies = get_top_main_companies(X_train, 10)
   X_train = add_company_columns(X_train, top_companies)
   X_test  = add_company_columns(X_test, top_companies)
 

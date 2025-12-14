@@ -24,8 +24,8 @@ def plot_model_comparison(results):
   # R²
   plt.subplot(1, 2, 2)
   sns.barplot(x=models, y=r2)
-  plt.title("Comparaison des R²")
-  plt.ylabel("R²")
+  plt.title("Comparaison des R^2")
+  plt.ylabel("R^2")
 
   plt.tight_layout()
   plt.show()
@@ -33,13 +33,13 @@ def plot_model_comparison(results):
 def plot_accuracy_comparison(results):
   models = ["Baseline", "Régression Linéaire", "Random Forest"]
   acc1 = [
-    results["baseline"]["acc_±1"],
-    results["linear_regression"]["acc_±1"],
-    results["random_forest"]["acc_±1"],
+    results["baseline"]["acc_1"],
+    results["linear_regression"]["acc_1"],
+    results["random_forest"]["acc_1"],
   ]
   plt.figure(figsize=(6, 4))
   sns.barplot(x=models, y=acc1)
-  plt.title("Accuracy à ±1 point")
+  plt.title("Accuracy à 1 point près")
   plt.ylabel("Accuracy (%)")
   plt.xlabel("Modèle")
   plt.ylim(0, 100)
