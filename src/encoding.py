@@ -155,7 +155,7 @@ def encode_all(X_train, X_test):
   X_test = X_test.copy()
 
   # Genres
-  top_genres = get_top_genres(X_train, 5)
+  top_genres = get_top_genres(X_train, 10)
   X_train = add_genre_columns(X_train, top_genres)
   X_test  = add_genre_columns(X_test, top_genres)
 
